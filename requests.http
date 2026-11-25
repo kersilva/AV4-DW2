@@ -1,0 +1,190 @@
+@baseUrl = http://localhost:3000
+
+### Listar jogadores (seed: IDs 1 a 6)
+GET {{baseUrl}}/jogadores
+
+### Consultar jogador -> 200
+GET {{baseUrl}}/jogadores/4
+
+### Jogador inexistente -> 404
+GET {{baseUrl}}/jogadores/999
+
+### Cadastrar jogador -> 201 (criado com id 7)
+POST {{baseUrl}}/jogadores
+Content-Type: application/json
+
+{
+  "nome": "Eduardo Nunes",
+  "posicao": "Z"
+}
+
+### Posição inválida -> 400
+POST {{baseUrl}}/jogadores
+Content-Type: application/json
+
+{
+  "nome": "Teste",
+  "posicao": "X"
+}
+
+### Atualizar jogador -> 200
+PUT {{baseUrl}}/jogadores/7
+Content-Type: application/json
+
+{
+  "nome": "Eduardo Nunes Silva"
+}
+
+### Desativar jogador -> 200
+PATCH {{baseUrl}}/jogadores/7/desativar
+
+### Consultar limite semanal -> 200
+GET {{baseUrl}}/configuracao
+
+### Atualizar limite semanal -> 200
+PUT {{baseUrl}}/configuracao
+Content-Type: application/json
+
+{
+  "cargaMaximaSemanal": 150
+}
+
+### Registrar treino -> 201 (carga esperada: (90 / 10) x 8 x 1,5 = 108)
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T021",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T08:00:00-03:00",
+  "tipo": "F",
+  "duracaoMin": 90,
+  "intensidade": 8
+}
+
+### Código duplicado -> 409
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T001",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "T",
+  "duracaoMin": 60,
+  "intensidade": 6
+}
+
+### Intensidade acima de 10 -> 400
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T022",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "T",
+  "duracaoMin": 60,
+  "intensidade": 11
+}
+
+### Intensidade zero -> 400
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T023",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "T",
+  "duracaoMin": 60,
+  "intensidade": 0
+}
+
+### Duração não positiva -> 400
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T024",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "T",
+  "duracaoMin": 0,
+  "intensidade": 5
+}
+
+### Tipo inválido -> 400
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T025",
+  "jogadorId": 4,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "X",
+  "duracaoMin": 60,
+  "intensidade": 5
+}
+
+### Jogador inexistente -> 404
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T026",
+  "jogadorId": 999,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "F",
+  "duracaoMin": 60,
+  "intensidade": 5
+}
+
+### Jogador inativo (Eduardo, id 7, desativado acima) -> 409
+POST {{baseUrl}}/treinos
+Content-Type: application/json
+
+{
+  "codigo": "T027",
+  "jogadorId": 7,
+  "dataTreino": "2026-10-19T09:00:00-03:00",
+  "tipo": "E",
+  "duracaoMin": 60,
+  "intensidade": 5
+}
+
+### Listar todos os treinos -> 200
+GET {{baseUrl}}/treinos
+
+### Filtrar por jogador e tipo -> 200
+GET {{baseUrl}}/treinos?jogadorId=6&tipo=F
+
+### Filtrar por período -> 200
+GET {{baseUrl}}/treinos?dataInicio=2026-10-05&dataFim=2026-10-11
+
+### Treinos de um jogador -> 200
+GET {{baseUrl}}/treinos/jogador/4
+
+### Treinos de jogador inexistente -> 404
+GET {{baseUrl}}/treinos/jogador/999
+
+### Excluir treino -> 200
+DELETE {{baseUrl}}/treinos/T021
+
+### Excluir treino inexistente -> 404
+DELETE {{baseUrl}}/treinos/T999
+
+### Relatório da semana 1 (05/10 a 11/10): Felipe e Gabriel em risco -> 200
+GET {{baseUrl}}/relatorios/semanal?data=2026-10-05
+
+### Relatório da semana 2 (12/10 a 18/10): sem risco -> 200
+GET {{baseUrl}}/relatorios/semanal?data=2026-10-12
+
+### Semana sem treinos (26/10 a 01/11) -> 200
+GET {{baseUrl}}/relatorios/semanal?data=2026-10-26
+
+### Data ausente -> 400
+GET {{baseUrl}}/relatorios/semanal
+
+### Data em formato errado -> 400
+GET {{baseUrl}}/relatorios/semanal?data=05-10-2026
